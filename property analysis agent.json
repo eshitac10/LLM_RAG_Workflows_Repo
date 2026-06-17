@@ -1,0 +1,211 @@
+{
+  "name": "property analysis agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "property-analysis",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "93c85cd0-2b82-4dee-80b3-2aee18f80033",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        704,
+        112
+      ],
+      "webhookId": "property-analysis",
+      "httpMethod": "POST"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "number": [
+            {
+              "name": "property_price",
+              "value": 5000000
+            },
+            {
+              "name": "rental_income",
+              "value": 25000
+            },
+            {
+              "name": "expenses",
+              "value": 5000
+            },
+            {
+              "name": "appreciation_rate",
+              "value": 5
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8364f2db-b38d-4a3e-9aa1-e688118e81ca",
+      "name": "Set Input Data1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        912,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const price = $json.property_price;\nconst rent = $json.rental_income;\nconst expenses = $json.expenses;\nconst appreciation = $json.appreciation_rate;\n\nconst annualRent = rent * 12;\nconst annualExpenses = expenses * 12;\n\nconst netIncome = annualRent - annualExpenses;\nconst roi = (netIncome / price) * 100;\nconst appreciationValue = (price * appreciation) / 100;\n\nreturn [{\n  json: {\n    price,\n    annualRent,\n    netIncome,\n    roi: roi.toFixed(2),\n    appreciationValue\n  }\n}];"
+      },
+      "id": "8b4ddf97-a681-4c79-90bd-c3f9642433a0",
+      "name": "Calculate ROI1",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "report",
+              "value": "={{$json[\"candidates\"][0][\"content\"][\"parts\"][0][\"text\"].replace(/\\n/g, \"\\n\\n\")}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19035b43-9b68-4f6f-96e2-67f7569f4408",
+      "name": "Extract Report1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e033af38-f073-496b-a0d6-0855802f9b77",
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyCkDT1NbRqzANuj2VM9_e06q925Jlrkxqg"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are a professional real estate investment analyst.\\n\\nProperty Details:\\n- Property Price: {{$json.price}}\\n- Annual Rent: {{$json.annualRent}}\\n- Net Income: {{$json.netIncome}}\\n- ROI: {{$json.roi}}%\\n\\nReturn ONLY a valid JSON object in this format:\\n\\n{\\n  \\\"summary\\\": \\\"...\\\",\\n  \\\"key_metrics\\\": {\\n    \\\"property_price\\\": \\\"...\\\",\\n    \\\"annual_rent\\\": \\\"...\\\",\\n    \\\"net_income\\\": \\\"...\\\",\\n    \\\"roi\\\": \\\"...\\\"\\n  },\\n  \\\"strengths\\\": [\\\"...\\\", \\\"...\\\", \\\"...\\\"],\\n  \\\"risks\\\": [\\\"...\\\", \\\"...\\\", \\\"...\\\"],\\n  \\\"recommendation\\\": \\\"...\\\"\\n}\\n\\nIMPORTANT:\\n- Return ONLY JSON\\n- No extra text\\n- No markdown\\n- No explanation outside JSON\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1312,
+        112
+      ],
+      "id": "11284cb1-d5d3-484d-bd0c-44e164eb2c15",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Set Input Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Input Data1": {
+      "main": [
+        [
+          {
+            "node": "Calculate ROI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate ROI1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Report1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "141aa17a-5dcf-42d3-a4cb-a85e8f3771f4",
+  "meta": {
+    "instanceId": "20f98b0eacea3176df43de0201ed2252df949b3c95a9b89a10f5065fbba63842"
+  },
+  "nodeGroups": [],
+  "id": "VlvHy933VKWJU2S8",
+  "tags": []
+}

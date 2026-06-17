@@ -1,0 +1,436 @@
+{
+  "name": "Cold Outreach",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "dd58e68e-9b7a-491d-9986-f0da18339afe",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -896,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs",
+          "mode": "list",
+          "cachedResultName": "bulk email ids",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1657475087,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs/edit#gid=1657475087"
+        },
+        "options": {}
+      },
+      "name": "Get Prospects",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -672,
+        256
+      ],
+      "id": "ec929624-b592-4ea5-9b50-ef386851ea45",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZZwHc0Q7y4EVnGjP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.filter(item => item.json.Status === 'Pending');"
+      },
+      "name": "Filter Pending",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        -448,
+        256
+      ],
+      "id": "1e87ebe4-d726-4cd2-b421-348581c37a9a",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -224,
+        256
+      ],
+      "id": "96887954-6a58-4c32-af02-a6a5c60428db",
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Edit Fields\"].json[\"Email\"] }}",
+        "subject": "={{ `Quick idea for your ${$node[\"Edit Fields\"].json[\"Business Type\"]}` }}",
+        "message": "={{ $json[\"candidates\"][0][\"content\"][\"parts\"][0][\"text\"] }}",
+        "options": {}
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -896,
+        -272
+      ],
+      "id": "fd4fed20-b964-407d-a343-b8496acad129",
+      "typeVersion": 2.2,
+      "webhookId": "6beba347-44e6-490f-8f9d-e8d512956f5c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "sjbbfRsgmJLg7XfZ",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        448,
+        176
+      ],
+      "id": "9b7d852d-5349-4fec-add1-bd5216268f2d",
+      "typeVersion": 1.1,
+      "webhookId": "2d9a1bbf-184f-4bd6-99a7-d6f396434b99"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs",
+          "mode": "list",
+          "cachedResultName": "bulk email ids",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1657475087,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DRNjkBDrpVfLWw9VFM5FOvyLTbyL6Wz0eDPnFUGOdrs/edit#gid=1657475087"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ String($node[\"Edit Fields\"].json[\"row_number\"]) }}",
+            "Email": "={{ $node[\"Edit Fields\"].json[\"Email\"] }}",
+            "Status": "Sent"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Business Type",
+              "displayName": "Business Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "name": "Update Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        672,
+        256
+      ],
+      "id": "64ea8f2c-d1c8-4abf-8895-89a53a377afb",
+      "typeVersion": 4.7,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZZwHc0Q7y4EVnGjP",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1e97c6d-5ab0-4d73-a826-4d151bc918d8",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "8390bb11-1bd1-4a0f-b227-3fbdf43ba03d",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        256
+      ],
+      "id": "80f89248-5008-46d9-8541-e849bbe4e737",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyB9CuCDul4bbGQeLioUcHabDyRi6oGaTsk"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  contents: [\n    {\n      parts: [\n        {\n          text:\n            \"Write a short cold outreach email.\\n\\n\" +\n            \"Name: \" + $json.Name + \"\\n\" +\n            \"Business: \" + $json[\"Business Type\"] + \"\\n\" +\n            \"City: \" + $json.City + \"\\n\\n\" +\n            \"Keep it under 80 words, friendly and human, with a clear call to action.\"\n        }\n      ]\n    }\n  ]\n})\n}}",
+        "options": {}
+      },
+      "name": "Generate Email (Gemini)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -896,
+        -48
+      ],
+      "id": "b1a227bd-753f-457e-a03f-a34e18df8e94",
+      "typeVersion": 4.4,
+      "retryOnFail": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "fromEmail": "ammeet@raiiai.com",
+        "toEmail": "={{ $node[\"Edit Fields\"].json[\"Email\"] }}",
+        "subject": "={{ \"AI automation in real estate\" }}",
+        "html": "=Hi {{$node[\"Edit Fields\"].json[\"Name\"]}},\n\n\nRAIIAI.COM is an AI-powered platform built for real estate professionals — automating lead scoring, follow-ups, and property matching so you close faster.\n\nExplore more at raiiai.com\n",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        176
+      ],
+      "id": "7baf8b2f-97e1-45d8-a0f4-370799bf818a",
+      "name": "Send an Email",
+      "webhookId": "65c4dc89-c771-4081-94cf-944987b7c1ec",
+      "credentials": {
+        "smtp": {
+          "id": "EvPKEq0AA1gViFfB",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prospects": {
+      "main": [
+        [
+          {
+            "node": "Filter Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Pending": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Update Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Email (Gemini)": {
+      "main": [
+        []
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fe2e0e1f-f445-43f8-bcea-a1717fce06da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20f98b0eacea3176df43de0201ed2252df949b3c95a9b89a10f5065fbba63842"
+  },
+  "nodeGroups": [],
+  "id": "k2DdLs13KCbSHCqk",
+  "tags": []
+}
